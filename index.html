@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>A Question for Jigyansha ❤️</title>
+    <title>A Special Question for you ❤️</title>
     <style>
         body {
             margin: 0;
@@ -15,15 +15,37 @@
             background-color: #ffeef2;
             font-family: 'Arial', sans-serif;
             overflow: hidden;
-            touch-action: none; /* Prevents scrolling while she tries to click */
+            touch-action: none;
         }
 
-        #emoji-display { font-size: 80px; height: 100px; margin-bottom: 10px; }
-        h1 { color: #d63384; text-align: center; padding: 0 20px; }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #emoji-display { font-size: 80px; min-height: 120px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; }
+        #emoji-display img { border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        
+        #question { 
+            color: #d63384; 
+            text-align: center; 
+            padding: 0 20px;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        #desperate-message {
+            color: #ff4d6d;
+            font-style: italic;
+            height: 25px;
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
 
         .button-container {
             display: flex;
-            gap: 50px; /* Separates the buttons clearly at the start */
+            gap: 50px;
             margin-top: 30px;
         }
 
@@ -46,15 +68,23 @@
         #no-btn {
             background-color: #adb5bd;
             color: white;
-            position: relative; /* Starts in flow, then we switch to absolute */
-            transition: left 0.2s ease-out, top 0.2s ease-out;
+            position: relative;
+            transition: left 0.15s ease-out, top 0.15s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-    <div id="emoji-display">✨</div>
-    <h1 id="question">Will you be my Valentine, Jigyansha? 💖</h1>
+    <div id="emoji-display">
+        <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExODlweWV5MHF5M2Q3Z2NraGQ5dThseGRhZWpweGw2d3FpZnc3djZlbiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l4Ki4biBSwhjyrS48/giphy.gif" width="180">
+    </div>
+    <h1 id="question">Will you be my Valentine, Jiggy? 💖</h1>
+    <div id="desperate-message"></div>
 
     <div class="button-container">
         <button id="yes-btn">YES! 😍</button>
@@ -63,13 +93,26 @@
 
     <script>
         const noBtn = document.getElementById("no-btn");
+        const yesBtn = document.getElementById("yes-btn");
         const emojiDisplay = document.getElementById("emoji-display");
-        const babyEmojis = ["🥺", "😭", "👶", "🧸", "💔", "🩹"];
+        const question = document.getElementById("question");
+        const desperateMsg = document.getElementById("desperate-message");
+        const container = document.querySelector(".button-container");
+
+        const babyEmojis = ["🥺", "😭", "💔"];
+        const happyEmojis = ["😍", "🥰", "❤️"];
         
+        const lovePleas = [
+            "Please? 🥺",
+            "Why though?? 😭",
+            "My heart is racing! 💓",
+            "Don't do this to me! 💔",
+            "I'm literally crying 😭"
+        ];
+
         let hasStartedFloating = false;
 
-        function escape(e) {
-            // On first interaction, switch to absolute positioning so it can float anywhere
+        function escape() {
             if (!hasStartedFloating) {
                 const rect = noBtn.getBoundingClientRect();
                 noBtn.style.position = 'fixed';
@@ -78,40 +121,93 @@
                 hasStartedFloating = true;
             }
 
-            // Calculate a new random position that keeps the button fully on screen
-            const padding = 20;
-            const maxX = window.innerWidth - noBtn.offsetWidth - padding;
-            const maxY = window.innerHeight - noBtn.offsetHeight - padding;
-            
-            const newX = Math.max(padding, Math.min(maxX, Math.random() * maxX));
-            const newY = Math.max(padding, Math.min(maxY, Math.random() * maxY));
+            const padding = 50;
+            const yesRect = yesBtn.getBoundingClientRect();
+            // Buffer to keep "No" away from "Yes"
+            const safeZone = 100; 
 
+            let newX, newY;
+            let isOverlapping = true;
+
+            // Collision Avoidance Loop
+            while (isOverlapping) {
+                newX = Math.max(padding, Math.min(window.innerWidth - noBtn.offsetWidth - padding, Math.random() * window.innerWidth));
+                newY = Math.max(padding, Math.min(window.innerHeight - noBtn.offsetHeight - padding, Math.random() * window.innerHeight));
+
+                // Check distance from Yes button
+                const dist = Math.hypot(newX - yesRect.left, newY - yesRect.top);
+                if (dist > (yesRect.width + safeZone)) {
+                    isOverlapping = false;
+                }
+            }
+            
             noBtn.style.left = newX + 'px';
             noBtn.style.top = newY + 'px';
 
-            // Trigger the "sad baby" reaction
-            const randomEmoji = babyEmojis[Math.floor(Math.random() * babyEmojis.length)];
-            emojiDisplay.innerText = randomEmoji;
+            emojiDisplay.innerText = babyEmojis[Math.floor(Math.random() * babyEmojis.length)];
+            desperateMsg.innerText = lovePleas[Math.floor(Math.random() * lovePleas.length)];
             
-            // Haptic feedback for Android (since you're a Mobile Lead, you'll appreciate this)
-            if (navigator.vibrate) {
-                navigator.vibrate(40); 
-            }
+            if (navigator.vibrate) navigator.vibrate(40);
         }
 
-        // Desktop Hover
         noBtn.addEventListener("mouseover", escape);
-        
-        // Mobile Touch (triggers as soon as her finger starts to go near/on the button)
-        noBtn.addEventListener("touchstart", (e) => {
-            e.preventDefault(); // Prevents the actual click
-            escape();
+        noBtn.addEventListener("touchstart", (e) => { e.preventDefault(); escape(); });
+
+        yesBtn.addEventListener("mouseenter", () => {
+            emojiDisplay.innerText = happyEmojis[Math.floor(Math.random() * happyEmojis.length)];
+            desperateMsg.innerText = "Best choice! You won't regret this! 😉";
         });
 
-        // "Yes" logic placeholder (we will handle the celebration later)
-        document.getElementById("yes-btn").addEventListener("click", () => {
-            alert("Stay tuned for the grand finale!");
+        yesBtn.addEventListener("click", () => {
+            document.body.style.backgroundColor = "#ffc8dd";
+            container.style.display = "none";
+            noBtn.style.display = "none";
+            desperateMsg.style.display = "none";
+            
+            emojiDisplay.innerHTML = `<img id="celebration-gif" src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExYTd0OGEwb2xmcW8xaHh6dWk5aDd2eHptcjJ0YWlwNmU5aXpxaDlwaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/9waIKqGT9i3RnBACLD/giphy.gif" width="250" style="transition: opacity 0.5s ease;">`;
+            
+            question.innerHTML = `
+                <div style="animation: pulse 1s infinite alternate;">
+                    <span style="font-size: 1.8rem;">YYayyyy, I knew you would say Yes! 💖</span>
+                </div>
+            `;
+
+            setTimeout(() => {
+                const gifElement = document.getElementById("celebration-gif");
+                gifElement.style.opacity = "0";
+                
+                setTimeout(() => {
+                    gifElement.src = "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcWhkcWp3dWsyY2UzaDZiamM5MTQ3YW83bnZ1NDVsaHQwa2hsYjNtZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/sddFzkjvIGVUws1xCS/giphy.gif";
+                    gifElement.style.opacity = "1";
+                    
+                    question.innerHTML += `
+                        <p id="final-msg" style="font-size: 1.2rem; font-weight: normal; margin-top: 20px; line-height: 1.6; animation: fadeIn 1.5s ease-in;">
+                            You are the best part of my life, love you to the moon and back! ❤️
+                        </p>
+                    `;
+                }, 500);
+            }, 3000);
+
+            setInterval(createHeart, 150);
         });
+
+        function createHeart() {
+            const heart = document.createElement("div");
+            heart.style.position = "fixed";
+            heart.style.left = Math.random() * 100 + "vw";
+            heart.style.top = "100vh";
+            heart.innerHTML = ["❤️", "💖", "🌸", "✨"][Math.floor(Math.random() * 4)];
+            heart.style.fontSize = Math.random() * 20 + 20 + "px";
+            heart.style.zIndex = "100";
+            document.body.appendChild(heart);
+
+            const animation = heart.animate([
+                { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                { transform: `translateY(-110vh) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+            ], { duration: 3000, easing: 'ease-out' });
+
+            animation.onfinish = () => heart.remove();
+        }
     </script>
 </body>
 </html>
